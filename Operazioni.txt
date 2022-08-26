@@ -1,0 +1,85 @@
+select tavolo.n_tavolo, tavolo.n_persone, tavolo.descrizione, cliente.nome as nome_cliente
+from prenotazione, tavolo, cliente
+where prenotazione.data_prenotata = '2010-05-07' AND
+        prenotazione.tipo_pasto <> 'Area Picnic' AND
+        prenotazione.id_posto = tavolo.id AND
+        cliente.cellulare = prenotazione.cliente;
+
+        
+select barbecue.*, prenotazione.data_prenotata, cliente.*
+from barbecue, prenotazione, cliente
+where prenotazione.tipo_pasto = 'Area Picnic' AND
+        prenotazione.id_posto = barbecue.id AND
+        prenotazione.cliente = cliente.cellulare AND
+        cliente.nome = 'incognita_x';
+
+        
+select pren.data_prenotata, cliente.nome, cliente.cellulare as cellulare_cliente, tavolo.descrizione, tavolo.n_persone, tavolo.n_tavolo, tavolo.id as id_tavolo
+from cliente, tavolo join conto c on tavolo.id = c.tavolo, prenotazione as pren
+where totale_saldo = (select max(totale_saldo) from conto) AND
+        pren.id_posto = tavolo.id AND
+        cliente.cellulare = pren.cliente;
+
+   
+select po.nome_piatto as ordinato, po.quantita, (piatto.prezzo * po.quantita) as sub_tot from piatto_ordinato as po, piatto  where conto_id IN (select id_conto from tavolo_conto
+                                                                                                                                    where id_tavolo = (select id_posto from prenotazione
+                                                                                                                                                       where data_prenotata = 'incognita_x' AND cliente = 'incognita_y')) AND
+        nome_piatto = piatto.nome
+UNION
+select bo.nome_bevanda, bo.quantita, (bevanda.prezzo * bo.quantita) as sub_tot from bevanda_ordinata as bo, bevanda  where conto_id IN (select id_conto from tavolo_conto
+                                                                                                                                        where id_tavolo = (select id_posto from prenotazione
+                                                                                                                                                           where data_prenotata = 'incognita_x' AND cliente = 'incognita_y')) AND
+        nome_bevanda = bevanda.nome
+UNION
+select vo.vino, vo.quantita, (vi.prezzo * vo.quantita) as sub_tot from vino_ordinato as vo, vino as vi where conto_id IN (select id_conto from tavolo_conto
+                                                                                                                          where id_tavolo = (select id_posto from prenotazione
+                                                                                                                                             where data_prenotata = 'incognita_x' AND cliente = 'incognita_y')) AND
+        vino = vi.nome;
+
+
+select distinct d1.cf, d1.nome, d1.ruolo, d1.codice_contratto from dipendenti as d1, dipendenti as d2
+where d1.cf = d2.cf AND
+        d1.ruolo <> d2.ruolo;
+        
+select nome_piatto, quantita from piatto_ordinato
+    where nome_piatto IN (select nome_piatto from piatto_ordinato
+                           where conto_id IN (select * from conti_periodo_mese)) AND
+        quantita = (select max(quantita) from piatto_ordinato
+                    where conto_id IN (select conto_id from piatto_ordinato where conto_id IN (select * from  conti_periodo_mese)));
+
+select nome from bevanda 
+where nome NOT IN (select distinct nome_bevanda 
+                   from bevanda_ordinata 
+                   where conto_id IN (select id_conto from tavolo_conto
+                                      where id_tavolo IN (select id_posto
+                                                       from prenotazione
+                                                       where
+(extract(year from data_prenotata) = 'incognita_x'))));
+
+
+select data_prenotata, tot_persone from tot_persone_prenotate
+    where tot_persone = (select max(tot_persone) 
+                         from tot_persone_prenotate);
+                         
+select nome, prezzo, annata, descrizione, vo.quantita 
+from vino join vino_ordinato vo on vino.nome = vo.vino
+where annata IN (select min(annata) from vino join vino_ordinato vo2 on   
+                                                  vino.nome = vo2.vino);
+                                                  
+select nome, codice_contratto from dipendente_turno as d1 where extract(month from data_turno) = '5' AND nome NOT IN (select nome from dipendente_turno where extract(month from data_turno) = '12');
+
+
+select nome, codice_contratto, ora_inizio, ora_fine from dipendente_turno as d1 
+where data_turno = 'incognita_x'
+                AND ora_inizio < ALL(select ora_inizio 
+                                    from dipendente_turno 
+                                     where data_turno = 'incognita_x' 
+                            and d1.codice_contratto <> codice_contratto);
+                            
+select * from tavolo where id IN 
+     (select id_tavolo from ordini_tavolo where prezzo between 1 and 13);
+
+select distinct data_menu, menu.nome, chef_id, sum(prezzo) as costo_menu from menu join menu_piatto mb on menu.data_menu = mb.menu, piatto 
+where piatto.nome = piatto
+group by menu.data_menu
+order by sum(prezzo) DESC;

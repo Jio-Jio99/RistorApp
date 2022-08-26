@@ -1,11 +1,19 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class Dbms {
     private static String prendi_nomi_tabelle = "select table_name from information_schema.tables where table_schema = 'public' AND table_type = 'BASE TABLE';";
     //Per selezionare la tabella fare replace("!", nome_tabella)
     private static String colonne_tabella = "select column_name, column_default, data_type, character_maximum_length from information_schema.columns where table_name = '!';";
+    private static String file = "Operazioni.txt";
+    private HashMap<Integer, String> query_op;
 
     private Statement statement;
     private ResultSet resultSet;
@@ -19,6 +27,7 @@ public class Dbms {
         scan = new Scanner(System.in);
         resultSet = statement.executeQuery(prendi_nomi_tabelle);
         lista_tabelle = new ArrayList<String>();
+        query_op  = new HashMap<>();
 
         while(resultSet.next())
             lista_tabelle.add(resultSet.getString(1));
@@ -120,7 +129,7 @@ public class Dbms {
     }
 
     public void operazioni() {
-
+        inizializza_map();
     }
 
     public void select() throws SQLException {
@@ -193,4 +202,15 @@ public class Dbms {
         scan.close();
     }
 
+
+    private void inizializza_map(){
+        try{
+            Path fileName = Path.of(file);
+            String str = Files.readString(fileName);
+            System.out.print(str);
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+    }
 }
