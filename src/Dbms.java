@@ -1,3 +1,5 @@
+import org.postgresql.util.PSQLException;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,7 +20,7 @@ public class Dbms {
     private static String file = "Operazioni.txt";
     private static String file_nomi = "NomiOperazioni.txt";
     private Map<Integer, String> query_op;
-    private static final String view13 =    "CREATE or REPLACE view conti_periodo_mese as " +
+    private static final String view9 =    "CREATE or REPLACE view conti_periodo_mese as " +
                                             "select id_conto from tavolo_conto " +
                                             "where id_tavolo IN (select id_posto from prenotazione " +
                                             "                    where extract(month from data_prenotata) = 'incognita_m');";
@@ -26,7 +28,7 @@ public class Dbms {
     private Statement statement;
     private ResultSet resultSet;
     private ResultSetMetaData rsmd;
-    private static final String DIV = Menu.ANSI_BLUE + "\t-\t" + Menu.ANSI_RESET;
+    private static final String DIV = Menu.ANSI_BLUE + " - " + Menu.ANSI_RESET;
     private Scanner scan;
     private ArrayList<String> lista_tabelle;
 
@@ -139,6 +141,7 @@ public class Dbms {
     public void operazioni() throws SQLException{
         String testo = "";
         String query = "";
+        String supporto = "";
 
         try {
             testo = Files.readString(Path.of(file_nomi));
@@ -153,18 +156,69 @@ public class Dbms {
 
         do {
             scelta = Menu.controllo_opzioni(scan.nextLine(), 13);
+            if (scelta == 0){
+                System.out.println("Error! Reinserire: ");
+                scelta = -1;
+            }
         }
         while (scelta == -1);
 
         query = query_op.get(scelta);
 
         if (query.contains("incognita_")){
-            System.out.println("HA VARIABILI, devo implementarlo ancora");
-            return;
+
+            if (query.contains("incognita_m")){
+                System.out.print("\t-Inserire il mese (a numero): ");
+                do{
+                    scelta = Menu.controllo_opzioni(scan.nextLine(), 12);
+                }
+                while(scelta == -1);
+
+                query = query.replace("incognita_m", scelta + "");
+            }
+            if (query.contains("incognita_d")){
+                System.out.print("\t-Inserire la data (formato aaaa-mm-dd): ");
+                supporto = scan.nextLine();
+
+                query = query.replace("incognita_d", supporto);
+            }
+            if (query.contains("incognita_a")){
+                System.out.print("\t-Inserire l'anno (formato aaaa): ");
+                supporto = scan.nextLine();
+
+                query = query.replace("incognita_a", supporto);
+            }
+            if (query.contains("incognita_c")){
+                System.out.print("\t-Inserire nome cliente: ");
+                supporto = scan.nextLine();
+
+                query = query.replace("incognita_c", supporto);
+            }
+            if (query.contains("incognita_t")) {
+                System.out.print("\t-Inserire cellulare del cliente: ");
+                supporto = scan.nextLine();
+
+                query = query.replace("incognita_t", supporto);
+            }
+        }
+        else if(scelta == 9){
+            System.out.print("-Inserire il numero del mese desiderato: ");
+
+            do{
+                scelta = Menu.controllo_opzioni(scan.nextLine(), 12);
+            }
+            while(scelta == -1);
+
+            statement.executeUpdate(view9.replace("incognita_m", scelta + ""));
         }
 
-        sql_result(query);
-        System.out.println(Menu.ANSI_RED + "\nRisultato:\n"+ Menu.ANSI_RESET + result_toString());
+        try{
+            sql_result(query);
+            System.out.println(Menu.ANSI_RED + "\nRisultato:\n"+ Menu.ANSI_RESET + result_toString());
+        }
+        catch (PSQLException e){
+            System.out.println(Menu.ANSI_RED + "Operazione annullata per inserimento dati errato: " + e.getMessage().toLowerCase().replace("\n", "") + Menu.ANSI_RESET);
+        }
     }
 
     public void select() throws SQLException {
@@ -234,13 +288,15 @@ public class Dbms {
             finale += "\n";
         }
 
+        if (r == 0)
+            return Menu.ANSI_BLUE + "\t\t" + "Nessun risultato" + Menu.ANSI_RESET;
+
         return finale;
     }
 
     public void fine(){
         scan.close();
     }
-
 
     private void inizializza_map(){
         AtomicInteger i = new AtomicInteger();

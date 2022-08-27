@@ -1,0 +1,18 @@
+	Tavoli/Prenotazioni:	
+		1- Stampare i tavoli prenotati per un certo giorno con il corrispettivo cliente
+		2- Stampare i barbecue avuti dal/dai cliente/i con nome x, dando i dati del cliente e il barbecue prenotato
+		3- Il numero del Tavolo, la data e i dati del cliente che ha speso di più
+		4- Stampa lo scontrino di un tavolo nel giorno aaaa-mm-dd del cliente x
+		5- I tavoli che hanno preso un piatto tra i 1 e 13 euro
+		
+	Dipendenti:
+		6- Prendere tutti i dati dei dipendenti (nome, cognome) che hanno avuto almeno due volte il contratto con almeno 1 ruolo diverso
+		7- Dipendenti che hanno lavorato solo il mese di maggio e non a dicembre
+		8- Selezionare tra i dipendenti di turno aaaa-mm-dd chi ha iniziato prima
+		
+	Statistiche Varie:
+		9- Il nome del piatto che nel mese x è stato ordinato di più
+		10- Le bevande che durante l’anno x non sono mai state ordinate
+		11- Giorni con più persone prenotate
+		12- I dati del vino più vecchio tra quelli ordinatio
+		13- Visionare i costi dei menu sui piatti in ordine dal più costoso al meno e il codice dello chef

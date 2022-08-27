@@ -14,7 +14,7 @@ public class Menu {
 
     public static final Integer OP = 5;
 
-    private static final String MENU = ANSI_RED + "\t\tBenvenuto in RistorApp!" +  ANSI_RESET;
+    private static final String MENU = ANSI_RED + "\t\t\t\t\t\tBENVENUTO IN RISTORAPP!" +  ANSI_RESET;
     private static final String OPZIONI = "Menu:"
             + "\n\t1- Visualizza Dati tabella"
             + "\n\t2- Inserisci nuovi dati"
