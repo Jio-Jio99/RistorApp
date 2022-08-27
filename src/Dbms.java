@@ -10,12 +10,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+//Incognita_D = data, _C = cliente, _a = anno, _m = mese _Cl cellulare
 public class Dbms {
     private static String prendi_nomi_tabelle = "select table_name from information_schema.tables where table_schema = 'public' AND table_type = 'BASE TABLE';";
     //Per selezionare la tabella fare replace("!", nome_tabella)
     private static String colonne_tabella = "select column_name, column_default, data_type, character_maximum_length from information_schema.columns where table_name = '!';";
     private static String file = "Operazioni.txt";
+    private static String file_nomi = "NomiOperazioni.txt";
     private Map<Integer, String> query_op;
+    private static final String view13 =    "CREATE or REPLACE view conti_periodo_mese as " +
+                                            "select id_conto from tavolo_conto " +
+                                            "where id_tavolo IN (select id_posto from prenotazione " +
+                                            "                    where extract(month from data_prenotata) = 'incognita_m');";
 
     private Statement statement;
     private ResultSet resultSet;
@@ -130,8 +136,35 @@ public class Dbms {
         System.out.println(Menu.ANSI_RED + "\t\tEliminato" +  Menu.ANSI_RESET);
     }
 
-    public void operazioni() {
+    public void operazioni() throws SQLException{
+        String testo = "";
+        String query = "";
 
+        try {
+            testo = Files.readString(Path.of(file_nomi));
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+
+        System.out.print("Operazioni disponibili:\n" + testo);
+        System.out.print("Scegli l'Operazione: ");
+        int scelta = 0;
+
+        do {
+            scelta = Menu.controllo_opzioni(scan.nextLine(), 13);
+        }
+        while (scelta == -1);
+
+        query = query_op.get(scelta);
+
+        if (query.contains("incognita_")){
+            System.out.println("HA VARIABILI, devo implementarlo ancora");
+            return;
+        }
+
+        sql_result(query);
+        System.out.println(Menu.ANSI_RED + "\nRisultato:\n"+ Menu.ANSI_RESET + result_toString());
     }
 
     public void select() throws SQLException {
@@ -174,6 +207,7 @@ public class Dbms {
 
     private String result_toString() throws SQLException {
         int columnsNumber = rsmd.getColumnCount();
+        String supporto = "(vuoto)";
         String finale = "\t";
         int r = 0;
 
@@ -189,7 +223,10 @@ public class Dbms {
             finale += r + ")\t";
 
             for (int i = 1; i <= columnsNumber; i++){
-                finale += resultSet.getString(i);
+                supporto = resultSet.getString(i);
+                if(supporto == null)
+                    supporto = "(vuoto)";
+                finale += supporto;
                 if(i != columnsNumber)
                     finale += DIV;
             }
